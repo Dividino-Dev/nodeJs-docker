@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+  db:
+    container_name: "database_node"
+    image: postgres
+    environment:
+      POSTGRES_USER: "dev"
+      POSTGRES_PASSWORD: "dev_pass"
+      POSTGRES_DB: "dev_db"
+    ports:
+      - "5432:5432"
+    networks:
+      - dev-network
+
+  app:
+    container_name: "node_app"
+    build: .
+    command: npm start
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/usr/app
+      - prisma:/usr/app/prisma
+    depends_on:
+      - db
+    environment:
+      - NODE_ENV=dev
+      - DATABASE_URL=postgresql://dev:dev_pass@db:5432/dev_db
+    networks:
+      - dev-network
+  
+networks: 
+  dev-network:
+    driver: bridge
+
+volumes:
+  prisma:
